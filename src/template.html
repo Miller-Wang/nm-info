@@ -10,7 +10,7 @@
 </head>
 <body>
   <div id="app">
-    <el-table :data="modules" row-key="module" stripe style="width: 100%">
+    <el-table :data="modules" row-key="id" stripe style="width: 100%">
       <el-table-column prop="module" width="200" label="ModuleName"></el-table-column>
       <el-table-column prop="sizeM" sortable sort-by="size" width="150" label="Size(M)"></el-table-column>
       <el-table-column prop="size" sortable sort-by="size" width="150" label="Size(K)"></el-table-column>
@@ -18,7 +18,7 @@
       <el-table-column prop="package.version" width="150" label="Version"></el-table-column>
       <el-table-column prop="package.homepage"  label="Home">
         <template slot-scope="scope">
-          <a :href="scope.row.package.homepage" target="_blank">{{scope.row.package.homepage}}</a>
+          <el-button type="text" size="small" @click="goHome(scope.row)">{{scope.row.package && scope.row.package.homepage}}</el-button>
         </template>
       </el-table-column>
       <el-table-column prop="package.description" label="Description"></el-table-column>
@@ -36,7 +36,14 @@
         modules(){
           return modules;
         }
-      }
+      },
+      methods: {
+        goHome(row){
+          if (row && row.package && row.package.homepage) {
+            window.open(row.package.homepage, '_blank')
+          }
+        }
+      },
     })
   </script>
   

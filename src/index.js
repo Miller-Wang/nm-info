@@ -21,6 +21,7 @@ function splitLine(output) {
     size: total,
     sizeM: (total / 1024).toFixed(3) + 'M',
     module: file,
+    id: Math.random()
   };
 }
 
@@ -54,7 +55,7 @@ async function getDeps(modulePath) {
     }, {});
     return pickPackage;
   } catch (error) {
-    return;
+    return {};
   }
 }
 
