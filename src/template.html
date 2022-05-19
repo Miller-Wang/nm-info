@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>node-modules-info</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <!-- insert-data -->
+</head>
+<body>
+  <div id="app">
+    <el-table :data="modules" row-key="module" stripe style="width: 100%">
+      <el-table-column prop="module" width="200" label="ModuleName"></el-table-column>
+      <el-table-column prop="sizeM" sortable sort-by="size" width="150" label="Size(M)"></el-table-column>
+      <el-table-column prop="size" sortable sort-by="size" width="150" label="Size(K)"></el-table-column>
+      <el-table-column prop="package.license" width="150" label="License"></el-table-column>
+      <el-table-column prop="package.version" width="150" label="Version"></el-table-column>
+      <el-table-column prop="package.homepage"  label="Home">
+        <template slot-scope="scope">
+          <a :href="scope.row.package.homepage" target="_blank">{{scope.row.package.homepage}}</a>
+        </template>
+      </el-table-column>
+      <el-table-column prop="package.description" label="Description"></el-table-column>
+    </el-table>
+  </div>
+  <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.9/vue.min.js"></script>
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      data: function() {
+        return { visible: false }
+      },
+      computed: {
+        modules(){
+          return modules;
+        }
+      }
+    })
+  </script>
+  
+</body>
+</html>
