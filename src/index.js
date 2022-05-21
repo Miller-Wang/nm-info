@@ -21,7 +21,7 @@ function splitLine(output) {
     size: total,
     sizeM: (total / 1024).toFixed(3) + 'M',
     module: file,
-    id: Math.random()
+    id: Math.random(),
   };
 }
 
@@ -40,9 +40,8 @@ async function getSubModules(modulesPath) {
       }),
   );
   const subModules = await Promise.all(promises);
-  return subModules.filter(v => v);
+  return subModules.filter((v) => v);
 }
-
 
 async function getDeps(modulePath) {
   const packagePath = path.join(modulePath, 'package.json');
@@ -53,40 +52,84 @@ async function getDeps(modulePath) {
       memo[k] = package[k] && !package[k].includes('`') ? package[k] : '';
       return memo;
     }, {});
+    let editUrl = '';
+    if (typeof package.repository === 'string') {
+      editUrl = package.repository;
+    } else if (typeof package.repository === 'object') {
+      editUrl = package.repository.url;
+    }
+
+    if (editUrl.includes('://')) {
+      [, editUrl] = editUrl.match(/:\/\/(.*)$/);
+    }
+
+    if (editUrl.endsWith('.git')) {
+      editUrl = editUrl.substring(0, editUrl.length - 4);
+    }
+    editUrl = editUrl.replace('.com', '.dev');
+    pickPackage.editUrl = `https://${editUrl}`;
     return pickPackage;
   } catch (error) {
     return {};
   }
 }
 
+function execPromise(commnad, options) {
+  return new Promise((resolve, reject) => {
+    exec(commnad, options, (err, stdout) => {
+      err ? reject(err) : resolve(stdout.split('\t')[0]);
+    });
+  });
+}
+
 (async () => {
   const modulesPath = path.resolve(process.cwd(), './node_modules');
-  const ora = await import("ora");
+  const ora = await import('ora');
   const spinner = ora.default('Loading...');
   try {
     spinner.start();
+    const totalSize = await execPromise(`du -sh node_modules`);
+    let totalPackages = 0;
     const files = await fs.readdir(modulesPath);
-    const allProcess = files.filter(v => !v.startsWith('.')).map(
-      (file) =>
-        new Promise((resolve, reject) => {
-          exec(`du -sh ${file}`, { cwd: modulesPath }, async (err, stdout) => {
-            if (err) return reject(err);
-            const module = splitLine(stdout);
-            // 处理@开头的包
-            if (file.startsWith('@')) {
-              module.children = await getSubModules(path.join(modulesPath, file));
-            } else if (module) {
-              // 获取依赖
-              module.package = await getDeps(path.join(modulesPath, file));
-            }
-            resolve(module);
-          });
-        }),
-    );
+    const allProcess = files
+      .filter((v) => !v.startsWith('.'))
+      .map(
+        (file) =>
+          new Promise((resolve, reject) => {
+            exec(
+              `du -sh ${file}`,
+              { cwd: modulesPath },
+              async (err, stdout) => {
+                if (err) return reject(err);
+                const module = splitLine(stdout);
+                // 处理@开头的包
+                if (file.startsWith('@')) {
+                  module.children = await getSubModules(
+                    path.join(modulesPath, file),
+                  );
+                  module.children.forEach(m => {
+                    m.packageDir = `/${file}/${m.module}`;
+                  });
+                  totalPackages += module.children.length;
+                } else if (module) {
+                  // 获取依赖
+                  module.package = await getDeps(path.join(modulesPath, file));
+                  module.packageDir = `/${module.module}`;
+                  totalPackages += 1;
+                }
+                resolve(module);
+              },
+            );
+          }),
+      );
 
     const outputs = await Promise.all(allProcess);
     spinner.succeed();
-    startServer(outputs.filter((v) => v));
+    startServer({
+      modules: outputs.filter((v) => v),
+      totalSize,
+      totalPackages,
+    });
   } catch (err) {
     spinner.fail();
     console.error(err);

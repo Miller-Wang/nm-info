@@ -21,10 +21,20 @@
 </head>
 <body>
   <div id="app">
+    <div style="display: flex;">
+      <h3 style="margin-right: 50px;">Total packages: {{totalPackages}}</h3>
+      <h3>Total size: {{totalSize}}</h3>
+    </div>
+    
     <el-table :data="modules" row-key="id" stripe style="width: 100%">
       <el-table-column prop="module" width="220" label="Module" :filters="filters" :filter-method="filterHandler">
         <template slot-scope="scope">
-          <a :href="`/${scope.row.module}`">{{scope.row.module}}</a>
+          <a :href="scope.row.packageDir">{{scope.row.module}}</a>
+        </template>
+      </el-table-column>
+      <el-table-column prop="package.editUrl" width="120" label="Online Editor">
+        <template slot-scope="scope" v-if="scope.row.package && scope.row.package.editUrl">
+          <a :href="scope.row.package.editUrl" target="_blank">Open</a>
         </template>
       </el-table-column>
       <el-table-column prop="sizeM" sortable sort-by="size" width="120" label="Size(M)"></el-table-column>
@@ -33,7 +43,7 @@
       <el-table-column prop="package.version" width="120" label="Version"></el-table-column>
       <el-table-column prop="module" width="120" label="Package">
         <template slot-scope="scope" v-if="scope.row.module && !scope.row.module.startsWith('@')">
-          <a :href="`/${scope.row.module}/package.json`">package.json</a>
+          <a :href="`/${scope.row.module}/package.json`" target="_blank">package.json</a>
         </template>
       </el-table-column>
       <el-table-column prop="package.homepage"  label="Home">
@@ -47,10 +57,11 @@
   <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.9/vue.min.js"></script>
   <script src="https://unpkg.com/element-ui/lib/index.js"></script>
   <script>
+    var { modules, totalSize, totalPackages } = window.datas;
     new Vue({
       el: '#app',
       data: function() {
-        return { filters: [] }
+        return { filters: [], totalSize, totalPackages }
       },
       mounted() {
         const filterStr = 'abcdefghijklmnopqrstuvwxyz';
