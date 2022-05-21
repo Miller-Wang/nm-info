@@ -1,6 +1,6 @@
 {
   "name": "nm-info",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "",
   "main": "index.js",
   "bin": {
@@ -10,7 +10,6 @@
     "dev": "node ./src/index.js",
     "start": "nm-info"
   },
-  "files": [],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Miller-Wang/nm-info.git"
