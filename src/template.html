@@ -6,19 +6,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>nm-info</title>
   <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
-  <!-- insert-data -->
+  <style>
+    a{
+      color: #1890ff;
+      font-size: 15px;
+    }
+    a:visited {
+      color: #551a8b;
+    }
+  </style>
+  <script>
+    // <!-- insert-data -->
+  </script>
 </head>
 <body>
   <div id="app">
     <el-table :data="modules" row-key="id" stripe style="width: 100%">
-      <el-table-column prop="module" width="200" label="ModuleName"></el-table-column>
-      <el-table-column prop="sizeM" sortable sort-by="size" width="150" label="Size(M)"></el-table-column>
-      <el-table-column prop="size" sortable sort-by="size" width="150" label="Size(K)"></el-table-column>
-      <el-table-column prop="package.license" width="150" label="License"></el-table-column>
-      <el-table-column prop="package.version" width="150" label="Version"></el-table-column>
+      <el-table-column prop="module" width="220" label="Module" :filters="filters" :filter-method="filterHandler">
+        <template slot-scope="scope">
+          <a :href="`/${scope.row.module}`">{{scope.row.module}}</a>
+        </template>
+      </el-table-column>
+      <el-table-column prop="sizeM" sortable sort-by="size" width="120" label="Size(M)"></el-table-column>
+      <el-table-column prop="size" sortable sort-by="size" width="120" label="Size(K)"></el-table-column>
+      <el-table-column prop="package.license" width="120" label="License"></el-table-column>
+      <el-table-column prop="package.version" width="120" label="Version"></el-table-column>
+      <el-table-column prop="module" width="120" label="Package">
+        <template slot-scope="scope" v-if="scope.row.module && !scope.row.module.startsWith('@')">
+          <a :href="`/${scope.row.module}/package.json`">package.json</a>
+        </template>
+      </el-table-column>
       <el-table-column prop="package.homepage"  label="Home">
         <template slot-scope="scope">
-          <el-button type="text" size="small" @click="goHome(scope.row)">{{scope.row.package && scope.row.package.homepage}}</el-button>
+          <el-button type="text" @click="goHome(scope.row)">{{scope.row.package && scope.row.package.homepage}}</el-button>
         </template>
       </el-table-column>
       <el-table-column prop="package.description" label="Description"></el-table-column>
@@ -30,8 +50,13 @@
     new Vue({
       el: '#app',
       data: function() {
-        return { visible: false }
+        return { filters: [] }
       },
+      mounted() {
+        const filterStr = 'abcdefghijklmnopqrstuvwxyz';
+        this.filters = filterStr.split('').map(value => ({text: value.toUpperCase(), value}));
+      },
+
       computed: {
         modules(){
           return modules;
@@ -41,6 +66,13 @@
         goHome(row){
           if (row && row.package && row.package.homepage) {
             window.open(row.package.homepage, '_blank')
+          }
+        },
+
+        filterHandler(value, row, column) {
+          const property = column['property'];
+          if (typeof row[property] === "string") {
+            return  row[property].startsWith(value);
           }
         }
       },

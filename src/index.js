@@ -3,7 +3,7 @@ const { exec } = require('child_process');
 const path = require('path');
 const startServer = require('./server');
 
-const Fields = ['name', 'version', 'description', 'main', 'keywords', 'author', 'license', 'homepage', 'dependencies'];
+const Fields = ['name', 'version', 'description', 'license', 'homepage'];
 
 function splitLine(output) {
   const [size, file] = output.split('\t');
@@ -15,7 +15,7 @@ function splitLine(output) {
   } else if (unit === 'K') {
     total = parseFloat(number);
   } else {
-    return;
+    return { id: Math.random() };
   }
   return {
     size: total,
@@ -50,7 +50,7 @@ async function getDeps(modulePath) {
     await fs.access(packagePath);
     const package = JSON.parse(await fs.readFile(packagePath));
     const pickPackage = Fields.reduce((memo, k) => {
-      memo[k] = package[k];
+      memo[k] = package[k] && !package[k].includes('`') ? package[k] : '';
       return memo;
     }, {});
     return pickPackage;
@@ -61,7 +61,10 @@ async function getDeps(modulePath) {
 
 (async () => {
   const modulesPath = path.resolve(process.cwd(), './node_modules');
+  const ora = await import("ora");
+  const spinner = ora.default('Loading...');
   try {
+    spinner.start();
     const files = await fs.readdir(modulesPath);
     const allProcess = files.filter(v => !v.startsWith('.')).map(
       (file) =>
@@ -82,8 +85,10 @@ async function getDeps(modulePath) {
     );
 
     const outputs = await Promise.all(allProcess);
+    spinner.succeed();
     startServer(outputs.filter((v) => v));
   } catch (err) {
+    spinner.fail();
     console.error(err);
   }
 })();

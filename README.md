@@ -2,7 +2,10 @@
 
 ### Get `node_modules` info in your project，display in browser。
 - support sort module by size
+- support filter by module name
+- support browse module directory
 - jump to module's Homepage
+
 
 
 ![](./preview.png)
@@ -13,7 +16,11 @@
 npm install nm-info -g
 ```
 
+```
+nm-info
 
-### TODO
-- commander
-- other 
+or
+
+nm-info start
+```
+

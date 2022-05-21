@@ -1,14 +1,16 @@
 {
   "name": "nm-info",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "",
   "main": "index.js",
   "bin": {
     "nm-info": "./bin/nm.js"
   },
   "scripts": {
-    "dev": "node ./src/index.js"
+    "dev": "node ./src/index.js",
+    "start": "nm-info"
   },
+  "files": [],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Miller-Wang/nm-info.git"
@@ -21,6 +23,9 @@
   },
   "homepage": "https://github.com/Miller-Wang/nm-info#readme",
   "dependencies": {
-    "command": "0.0.5"
+    "commander": "^9.2.0",
+    "ejs": "^3.1.8",
+    "mime": "^3.0.0",
+    "ora": "^6.1.0"
   }
 }
